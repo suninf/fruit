@@ -19,137 +19,33 @@
 
 #include "list.h"
 
-/*
-
-Types and operations provided by this header:
-
-AddToSet<T, S>           : adds T to S. If T is in S already, this is a no-op and S is returned.
-SetListUnion<S, L>       : adds all the elements of the list L to the set S.
-ListToSet<L>             : returns a set containing all the elements in L.
-SetIntersection<S1, S2>  : returns the intersection of the given sets.
-SetUnion<S1, S2>         : returns the union of the given sets.
-SetDifference<S1, S2>    : returns the set of elements that are in S1 but not in S2.
-IsSameSet<S1, S2>        : true if S1 and S2 represent the same set.
-ListOfSetsUnion<L>       : returns the union of all sets in the list L.
-
-Other operations provided by list.h that can be used for sets:
-
-List<Ts...>              : constructs a set with the specified elements. The elements must be distinct (except None, that can
-                           appear any number of times).
-IsInList<S, T>           : true if T appears at least once in S.
-IsEmptyList<S>           : true if S is empty (i.e. if all the elements are None)
-ListSize<S>              : the number of (non-None) elements of the set (as an int).
-ListApparentSize<S>      : the number of elements of the set *including* any None elements.
-RemoveFromList<S, T>     : returns a set equivalent to S but with T removed (if it was there at all).
-
-*/
+#include <boost/mpl/fold.hpp>
+#include <boost/mpl/set.hpp>
+#include <boost/mpl/insert.hpp>
 
 namespace fruit {
 namespace impl {
-  
-struct AddToSet {
-  template <typename T, typename L>
-  struct apply {
-    using type = Conditional<ApplyC<IsInList, T, L>::value,
-                             Lazy<L>,
-                             LazyApply<AddToList, T, L>>;
-  };
-};
 
-struct AddToSetMultiple {
-  template <typename S, typename... Ts>
-  struct apply {
-    using type = S;
-  };
+using namespace boost::mpl;
 
-  template <typename S, typename T1, typename... Ts>
-  struct apply<S, T1, Ts...> {
-    using type = Apply<AddToSet,
-                       T1,
-                       Apply<AddToSetMultiple, S, Ts...>>;
-  };
-};
-
-struct SetListUnion {
-  template <typename S, typename L>
-  struct apply {
-    using type = S;
-  };
-
-  template <typename S, typename... Ts>
-  struct apply<S, List<Ts...>> {
-    using type = Apply<AddToSetMultiple, S, Ts...>;
-  };
-};
-
+// Converts a List to an mpl::set.
+// O(size<L>)
 struct ListToSet {
   template <typename L>
   struct apply {
-    using type = Apply<SetListUnion, List<>, L>;
+    using type = Eval<fold<Apply<ToMplVector, L>,
+                           set<>,
+                           insert<_1, _2>>>;
   };
 };
 
-struct SetDifference {
-  template <typename S1, typename S2>
-  struct apply;
-
-  template <typename... Ts, typename S>
-  struct apply<List<Ts...>, S> {
-    using type = List<Eval<std::conditional<ApplyC<IsInList, Ts, S>::value, None, Ts>>...>;
-  };
-};
-
-struct SetIntersection {
-  template <typename S1, typename S2>
-  struct apply;
-
-  template <typename... Ts, typename S>
-  struct apply<List<Ts...>, S> {
-    using type = List<Eval<std::conditional<ApplyC<IsInList, Ts, S>::value, Ts, None>>...>;
-  };
-};
-
+// O(size<S1>)
 struct SetUnion {
   template <typename S1, typename S2>
   struct apply {
-    using type = Apply<ConcatLists, Apply<SetDifference, S1, S2>, S2>;
-  };
-};
-
-struct IsSameSet {
-  template <typename S1, typename S2>
-  struct apply {
-    static constexpr bool value = ApplyC<IsEmptyList, Apply<SetDifference, S1, S2>>::value
-                               && ApplyC<IsEmptyList, Apply<SetDifference, S2, S1>>::value;
-  };
-};
-
-struct MultipleSetsUnion {
-  template <typename... Sets>
-  struct apply {
-    using type = List<>;
-  };
-
-  template <typename Set>
-  struct apply<Set> {
-    using type = Set;
-  };
-
-  template <typename Set, typename Set2, typename... Sets>
-  struct apply<Set, Set2, Sets...> {
-    using type = Apply<SetUnion,
-                       Apply<SetUnion, Set, Set2>,
-                       Apply<MultipleSetsUnion, Sets...>>;
-  };
-};
-
-struct ListOfSetsUnion {
-  template <typename L>
-  struct apply {}; // Not used.
-
-  template <typename... Sets>
-  struct apply<List<Sets...>> {
-    using type = Apply<MultipleSetsUnion, Sets...>;
+    using type = Eval<fold<S1,
+                           S2,
+                           insert<_1, _2>>>;
   };
 };
 

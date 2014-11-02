@@ -20,6 +20,8 @@
 #include "../../fruit_forward_decls.h"
 #include "set.h"
 #include "metaprogramming.h"
+#include "basics.h"
+#include "proof_trees.h"
 #include "proof_trees.h"
 #include "../injection_debug_errors.h"
 

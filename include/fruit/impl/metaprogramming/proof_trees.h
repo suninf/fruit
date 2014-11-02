@@ -17,82 +17,75 @@
 #ifndef FRUIT_METAPROGRAMMING_PROOF_TREES_H
 #define FRUIT_METAPROGRAMMING_PROOF_TREES_H
 
+#include "basics.h"
+#include "list.h"
 #include "set.h"
+
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/set.hpp>
+#include <boost/mpl/map.hpp>
+#include <boost/mpl/transform_view.hpp>
+#include <boost/mpl/has_key.hpp>
+#include <boost/mpl/erase_key.hpp>
+#include <boost/mpl/fold.hpp>
+#include <boost/mpl/insert.hpp>
+#include <boost/mpl/filter_view.hpp>
+#include <boost/mpl/logical.hpp>
 
 namespace fruit {
 namespace impl {
 
-// Given a set of formulas Hps=List<Hp1, ... Hp(n)> and a formula Th, ConsProofTree<Hps, Th> represents the following proof tree:
+using namespace boost::mpl;
+
+// A proof forest is represented as a map, where elements are keyed by a formula Th and map to a mpl::set of formulas Hps of the
+// form {Hp1, ... Hp(n)}. Each element represents a proof tree:
 // 
 // Hp1 ... Hp(n)
 // -------------
 //      Th
 // 
-// Hp1, ... Hp(n) must be distinct.
-// Formulas are atomic, any type can be used as formula (except None).
-template <typename Hps1, typename Th1>
-struct ConsProofTree {
-  using Hps = Hps1;
-  using Th = Th1;
-};
-
-// A proof forest is a List of ConsProofTree<> elements, with unique theses, and where the theses never appear as hypotheses.
-using EmptyProofForest = List<>;
+// The keys of the map (theses) must not appear as hypotheses in the same proof forest.
+// Formulas are atomic, any type can be used as formula.
+using EmptyProofForest = map<>;
 
 // Removes the specified Hp from the proof tree.
+template <typename Hp>
 struct RemoveHpFromProofTree {
-  template <typename Hp, typename Proof>
+  template <typename Proof>
   struct apply {
-    using type = ConsProofTree<Apply<RemoveFromList, Hp, typename Proof::Hps>,
-                               typename Proof::Th>;
+    using type = pair<typename Proof::first,
+                      Eval<erase_key<typename Proof::second, Hp>>>;
   };
 };
 
-// Removes the specified Hp from all proofs in the forest.
-struct RemoveHpFromProofForest {
-  template <typename Hp, typename Forest>
-  struct apply;
-  
-  template <typename Hp, typename... Proofs>
-  struct apply<Hp, List<Proofs...>> {
-    using type = List<Apply<RemoveHpFromProofTree, Hp, Proofs>...>;
-  };
-};
-
-#ifndef FRUIT_NO_LOOP_CHECK
-
-// Constructs a proof tree with the given hypotheses and thesis.
-// The hypotheses don't have to be distinct. If you know that they are, use ConsProofTree instead.
-struct ConstructProofTree {
-  template <typename Hps, typename Th>
-  struct apply {
-    using type = ConsProofTree<Apply<ListToSet, Hps>, Th>;
-  };
-};
+// TODO: Fix typo.
+#ifndef FRUIT_NO_LOOP_CHECKz
 
 // Constructs a proof forest tree with the given theses and where all theses have the same (given) hypotheses.
 // The hypotheses don't have to be distinct. If you know that they are, use ConsProofTree instead.
+// Hps must be a List.
 struct ConstructProofForest {
   template <typename Hps, typename... Ths>
   struct apply {
-    using type = List<Apply<ConstructProofTree, Hps, Ths>...>;
+    using HpsSet = Apply<ListToSet, Hps>;
+    using type = map<pair<Ths, HpsSet>...>;
   };
 };
 
 // Checks if the given proof tree has the thesis among its hypotheses.
 struct HasSelfLoop {
   template <typename Proof>
-  struct apply : ApplyC<IsInList, typename Proof::Th, typename Proof::Hps> {
+  struct apply : has_key<typename Proof::second, typename Proof::first> {
   };
 };
 
 struct CombineForestHypothesesWithProofHelper {
   template <typename Proof, typename NewProof>
   struct apply {
-    using type = ConsProofTree<Apply<SetUnion,
-                                     typename NewProof::Hps,
-                                     Apply<RemoveFromList, typename NewProof::Th, typename Proof::Hps>>,
-                               typename Proof::Th>;
+    using type = pair<typename Proof::first,
+                      Apply<SetUnion,
+                            typename NewProof::second,
+                            erase_key<typename Proof::second, typename NewProof::first>>>;
   };
 };
 
@@ -105,7 +98,7 @@ struct CombineForestHypothesesWithProof {
 
   template <typename... Proofs, typename NewProof>
   struct apply<List<Proofs...>, NewProof> {
-    using type = List<Conditional<ApplyC<IsInList, typename NewProof::Th, typename Proofs::Hps>::value,
+    using type = List<Conditional<has_key<typename Proofs::Hps, typename NewProof::Th>::value,
                                   LazyApply<CombineForestHypothesesWithProofHelper, Proofs, NewProof>,
                                   Lazy<Proofs>>
                       ...>;

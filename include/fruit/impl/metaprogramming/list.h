@@ -19,7 +19,9 @@
 
 #include "basics.h"
 #include "logical_operations.h"
+
 #include <functional>
+#include <boost/mpl/vector.hpp>
 
 /*
 
@@ -43,6 +45,8 @@ RemoveFromList<L, T>       : returns a list equivalent to L but with all the occ
 
 namespace fruit {
 namespace impl {
+
+using namespace boost::mpl;
 
 // Used to pass around a List<Types...>, no meaning per se.
 template <typename... Types>
@@ -160,6 +164,18 @@ struct RemoveFromList {
     using type = List<
       Eval<std::conditional<std::is_same<T, Ts>::value, None, Ts>>
       ...>;
+  };
+};
+
+// Converts a List<> to an mpl::vector.
+// O(1)
+struct ToMplVector {
+  template <typename L>
+  struct apply;
+  
+  template <typename... Ts>
+  struct apply<List<Ts...>> {
+    using type = vector<Ts...>;
   };
 };
 
