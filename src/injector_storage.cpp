@@ -205,7 +205,9 @@ InjectorStorage::InjectorStorage(const NormalizedComponentStorage& normalized_co
 
   FixedSizeAllocator::FixedSizeAllocatorData fixed_size_allocator_data = normalized_component.fixed_size_allocator_data;
   
-  std::vector<std::pair<TypeId, BindingData>> component_bindings(std::move(component.bindings));
+  std::vector<std::pair<TypeId, BindingData>> component_bindings(component.bindings.begin(), component.bindings.end());
+  std::vector<std::pair<TypeId, MultibindingData>> component_multibindings(component.multibindings.begin(), 
+                                                                           component.multibindings.end());
   
   // Step 1: Remove duplicates among the new bindings, and check for inconsistent bindings within `component' alone.
   // Note that we do NOT use component.compressed_bindings here, to avoid having to check if these compressions can be undone.
@@ -214,7 +216,7 @@ InjectorStorage::InjectorStorage(const NormalizedComponentStorage& normalized_co
   normalizeBindings(component_bindings,
                     fixed_size_allocator_data,
                     {},
-                    component.multibindings,
+                    component_multibindings,
                     exposed_types,
                     bindingCompressionInfoMapUnused);
   assert(bindingCompressionInfoMapUnused.empty());
@@ -270,7 +272,7 @@ InjectorStorage::InjectorStorage(const NormalizedComponentStorage& normalized_co
                    BindingDataNodeIter{component_bindings.end()});
   
   // Step 4: Add multibindings.
-  addMultibindings(multibindings, fixed_size_allocator_data, std::move(component.multibindings));
+  addMultibindings(multibindings, fixed_size_allocator_data, std::move(component_multibindings));
   
   allocator = FixedSizeAllocator(fixed_size_allocator_data);
   

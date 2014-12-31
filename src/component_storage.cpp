@@ -32,17 +32,9 @@ using std::endl;
 namespace fruit {
 namespace impl {
 
-void ComponentStorage::install(ComponentStorage other) {
+void ComponentStorage::install(ComponentStorage&& other) {
   bindings.insert(std::move(other.bindings));
-  
-  // Heuristic to try saving an allocation by appending to the largest vector.
-  if (other.multibindings.capacity() > multibindings.capacity()) {
-    std::swap(multibindings, other.multibindings);
-  }
-  multibindings.insert(multibindings.end(),
-                       other.multibindings.begin(),
-                       other.multibindings.end());
-  
+  multibindings.insert(std::move(other.multibindings));
   compressed_bindings.insert(std::move(other.compressed_bindings));
 }
 

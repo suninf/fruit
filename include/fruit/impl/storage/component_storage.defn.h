@@ -31,15 +31,15 @@ namespace fruit {
 namespace impl {
 
 inline void ComponentStorage::addBinding(std::tuple<TypeId, BindingData> t) {
-  bindings.push_back(std::make_pair(std::get<0>(t), std::get<1>(t)));
+  bindings.insert(std::make_pair(std::get<0>(t), std::get<1>(t)));
 }
 
 inline void ComponentStorage::addCompressedBinding(std::tuple<TypeId, TypeId, BindingData> t) {
-  compressed_bindings.push_back(CompressedBinding{std::get<0>(t), std::get<1>(t), std::get<2>(t)});
+  compressed_bindings.insert(CompressedBinding{std::get<0>(t), std::get<1>(t), std::get<2>(t)});
 }
 
 inline void ComponentStorage::addMultibinding(std::tuple<TypeId, MultibindingData> t) {
-  multibindings.emplace_back(std::get<0>(t), std::get<1>(t));
+  multibindings.insert(std::make_pair(std::get<0>(t), std::get<1>(t)));
 }
 
 } // namespace fruit

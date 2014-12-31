@@ -47,9 +47,9 @@ NormalizedComponentStorage::NormalizedComponentStorage(ComponentStorage&& compon
          exposed_types);
 }
 
-NormalizedComponentStorage::NormalizedComponentStorage(std::vector<std::pair<TypeId, BindingData>>&& bindings_vector,
-                                                       std::vector<CompressedBinding>&& compressed_bindings_vector,
-                                                       std::vector<std::pair<TypeId, MultibindingData>>&& multibindings_vector,
+NormalizedComponentStorage::NormalizedComponentStorage(Bag<std::pair<TypeId, BindingData>>&& bindings_vector,
+                                                       Bag<CompressedBinding>&& compressed_bindings_vector,
+                                                       Bag<std::pair<TypeId, MultibindingData>>&& multibindings_vector,
                                                        std::initializer_list<TypeId> exposed_types) {
   init(std::move(bindings_vector),
        std::move(compressed_bindings_vector),
@@ -57,10 +57,14 @@ NormalizedComponentStorage::NormalizedComponentStorage(std::vector<std::pair<Typ
          exposed_types);
 }
 
-void NormalizedComponentStorage::init(std::vector<std::pair<TypeId, BindingData>>&& bindings_vector,
-                                      std::vector<CompressedBinding>&& compressed_bindings_vector,
-                                      std::vector<std::pair<TypeId, MultibindingData>>&& multibindings_vector,
+void NormalizedComponentStorage::init(Bag<std::pair<TypeId, BindingData>>&& bindings_bag,
+                                      Bag<CompressedBinding>&& compressed_bindings_bag,
+                                      Bag<std::pair<TypeId, MultibindingData>>&& multibindings_bag,
                                       std::initializer_list<TypeId> exposedTypes) {
+  
+  std::vector<std::pair<TypeId, BindingData>> bindings_vector(bindings_bag.begin(), bindings_bag.end());
+  std::vector<CompressedBinding> compressed_bindings_vector(compressed_bindings_bag.begin(), compressed_bindings_bag.end());
+  std::vector<std::pair<TypeId, MultibindingData>> multibindings_vector(multibindings_bag.begin(), multibindings_bag.end());
   
   InjectorStorage::normalizeBindings(bindings_vector,
                                      fixed_size_allocator_data,

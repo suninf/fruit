@@ -21,6 +21,7 @@
 #include "../binding_data.h"
 #include "../data_structures/semistatic_map.h"
 #include "../data_structures/semistatic_graph.h"
+#include "../data_structures/bag.h"
 #include "../fruit_internal_forward_decls.h"
 #include "injector_storage.h"
 
@@ -28,7 +29,6 @@
 #include <unordered_map>
 
 namespace fruit {
-
 namespace impl {
 
 /**
@@ -57,9 +57,9 @@ private:
   
   friend class InjectorStorage;
   
-  void init(std::vector<std::pair<TypeId, BindingData>>&& bindings,
-            std::vector<CompressedBinding>&& compressed_bindings,
-            std::vector<std::pair<TypeId, MultibindingData>>&& multibindings,
+  void init(Bag<std::pair<TypeId, BindingData>>&& bindings,
+            Bag<CompressedBinding>&& compressed_bindings,
+            Bag<std::pair<TypeId, MultibindingData>>&& multibindings,
             std::initializer_list<TypeId> exposed_types);
   
 public:
@@ -67,9 +67,9 @@ public:
   
   NormalizedComponentStorage(ComponentStorage&& component, std::initializer_list<TypeId> exposed_types);
 
-  NormalizedComponentStorage(std::vector<std::pair<TypeId, BindingData>>&& bindings,
-                             std::vector<CompressedBinding>&& compressed_bindings,
-                             std::vector<std::pair<TypeId, MultibindingData>>&& multibindings,
+  NormalizedComponentStorage(Bag<std::pair<TypeId, BindingData>>&& bindings,
+                             Bag<CompressedBinding>&& compressed_bindings,
+                             Bag<std::pair<TypeId, MultibindingData>>&& multibindings,
                              std::initializer_list<TypeId> exposed_types);
   
   NormalizedComponentStorage(NormalizedComponentStorage&&) = delete;

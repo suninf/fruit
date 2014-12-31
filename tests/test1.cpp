@@ -162,7 +162,8 @@ int main() {
   
   Component<std::function<AssistedMultiparamExample(std::map<int, float>)>> assistedMultiparamExampleComponent =
     createComponent();
-  Injector<std::function<AssistedMultiparamExample(std::map<int, float>)>> assistedMultiparamExampleInjector(assistedMultiparamExampleComponent);
+  Injector<std::function<AssistedMultiparamExample(std::map<int, float>)>> assistedMultiparamExampleInjector(
+    std::move(assistedMultiparamExampleComponent));
   
   return 0;
 }

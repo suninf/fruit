@@ -26,13 +26,13 @@ struct X {
 
 fruit::Component<X> getComponent() {
   Component<X> c = fruit::createComponent();
-  Component<X> copy = c;
-  return copy;
+  Component<X> c_after_move = std::move(c);
+  return c_after_move;
 }
 
 int main() {
   Component<X> component = getComponent();
-  Injector<X> injector(component);
+  Injector<X> injector(std::move(component));
   injector.get<X*>();
   
   return 0;

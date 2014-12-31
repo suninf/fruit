@@ -3,7 +3,7 @@ binding_error_not_base.cpp
 binding_compression_undone.cpp
 class_destruction.cpp
 component_conversion.cpp
-component_copy.cpp
+component_move.cpp
 dependency_loop.cpp
 eager_injection.cpp
 empty_injector.cpp

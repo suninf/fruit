@@ -22,11 +22,11 @@ using fruit::Injector;
 using fruit::createComponent;
 
 Component<int> getComponentForInstance(int& p) {
-  Component<> m = createComponent()
+  Component<> c = createComponent()
     .bindInstance(p);
   return createComponent()
     .registerConstructor<int()>()
-    .install(m);
+    .install(std::move(c));
 }
 
 int main() {

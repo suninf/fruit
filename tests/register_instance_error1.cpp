@@ -26,7 +26,7 @@ Component<int> getComponentForInstance() {
   Component<> comp = createComponent()
     .bindInstance(*(new int(5)));
   return createComponent()
-    .install(comp)
+    .install(std::move(comp))
     .bindInstance(*(new int(5)));
 }
 

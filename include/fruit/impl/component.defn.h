@@ -28,7 +28,7 @@ namespace fruit {
 
 template <typename... Params>
 template <typename OtherComp>
-inline Component<Params...>::Component(PartialComponent<OtherComp> component)
+inline Component<Params...>::Component(PartialComponent<OtherComp>&& component)
   : PartialComponent<fruit::impl::meta::Apply<fruit::impl::meta::ConstructComponentImpl, Params...>>(std::move(component)) {
 }
 
@@ -43,7 +43,7 @@ inline PartialComponent<Comp>::PartialComponent(fruit::impl::ComponentStorage&& 
 
 template <typename Comp>
 template <typename SourceComp>
-inline PartialComponent<Comp>::PartialComponent(PartialComponent<SourceComp> sourceComponent)
+inline PartialComponent<Comp>::PartialComponent(PartialComponent<SourceComp>&& sourceComponent)
   : storage(std::move(sourceComponent.storage)) {
   fruit::impl::ConvertComponent<Comp, SourceComp>()(storage);
 }
@@ -123,7 +123,7 @@ template <typename Comp>
 template <typename... OtherCompParams>
 inline PartialComponent<
     typename fruit::impl::InstallComponentHelper<Comp, OtherCompParams...>::Result>
-PartialComponent<Comp>::install(Component<OtherCompParams...> component) && {
+PartialComponent<Comp>::install(Component<OtherCompParams...>&& component) && {
   fruit::impl::InstallComponentHelper<Comp, OtherCompParams...>()(storage, std::move(component.storage));
   return {std::move(storage)};
 }

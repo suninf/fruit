@@ -36,7 +36,7 @@ template <typename... Params>
 class Component : public PartialComponent<fruit::impl::meta::Apply<fruit::impl::meta::ConstructComponentImpl, Params...>> {
 public:
   Component(Component&&) = default;
-  Component(const Component&) = default;
+  Component(const Component&) = delete;
   
   Component& operator=(Component&&) = delete;
   Component& operator=(const Component&) = delete;
@@ -46,7 +46,7 @@ public:
    * This is usually called implicitly when returning a component from a function. See PartialComponent for an example.
    */
   template <typename OtherComp>
-  Component(PartialComponent<OtherComp> component);
+  Component(PartialComponent<OtherComp>&& component);
   
 private:
   // Do not use. Use fruit::createComponent() instead.
@@ -93,6 +93,7 @@ template <typename Comp>
 class PartialComponent {
 public:
   PartialComponent(PartialComponent&&) = default;
+  PartialComponent(const PartialComponent&) = delete;
 
   PartialComponent& operator=(PartialComponent&&) = delete;
   PartialComponent& operator=(const PartialComponent&) = delete;
@@ -343,7 +344,7 @@ public:
    */
   template <typename... OtherCompParams>
   PartialComponent<typename fruit::impl::InstallComponentHelper<Comp, OtherCompParams...>::Result> 
-      install(Component<OtherCompParams...> component) &&;
+      install(Component<OtherCompParams...>&& component) &&;
   
 private:
   template <typename OtherComp>
@@ -363,15 +364,12 @@ private:
   // Do not use. Use fruit::createComponent() instead.
   PartialComponent() = default;
   
-  // Do not use. Only use PartialComponent for temporaries, and then convert it to a Component.
-  PartialComponent(const PartialComponent&) = default;
-  
   PartialComponent(fruit::impl::ComponentStorage&& storage);
   
   // Do not use. Convert the PartialComponent to a Component instead, and then use the conversion between Component objects if
   // needed.
   template <typename OtherComp>
-  PartialComponent(PartialComponent<OtherComp> source_component);
+  PartialComponent(PartialComponent<OtherComp>&& source_component);
 };
 
 } // namespace fruit

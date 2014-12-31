@@ -29,7 +29,7 @@ fruit::Component<> getComponent() {
   fruit::Component<> comp = fruit::createComponent()
     .registerProvider([](){return X(0);});
   return fruit::createComponent()
-    .install(comp)
+    .install(std::move(comp))
     .registerProvider([](){return X(1);});
 }
 

@@ -34,7 +34,7 @@ fruit::Component<X> getXComponent() {
 
 int main() {
   Component<X> component = getXComponent();
-  Injector<X> injector(component);
+  Injector<X> injector(std::move(component));
   injector.get<X*>();
   
   return 0;

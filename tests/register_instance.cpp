@@ -25,7 +25,7 @@ Component<int> getComponentForInstance(int& n) {
   Component<> comp = createComponent()
     .bindInstance(n);
   return createComponent()
-    .install(comp)
+    .install(std::move(comp))
     .bindInstance(n);
 }
 
