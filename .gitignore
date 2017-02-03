@@ -7,3 +7,4 @@ bench_results
 *.pyc
 /build*
 /cmake-build-debug
+xcodebuild
