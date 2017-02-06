@@ -8,3 +8,4 @@ bench_results
 /build*
 /cmake-build-debug
 xcodebuild
+makebuild
